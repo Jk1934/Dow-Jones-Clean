@@ -1,29 +1,37 @@
 document.addEventListener('DOMContentLoaded', () => {
   const tableBody = document.getElementById('stock-table-body');
 
-  // Function to fetch and display stock data
-  const fetchStockData = async () => {
+  async function fetchStockData() {
     try {
       const response = await fetch('/api/stocks');
-      if (!response.ok) throw new Error("Failed to fetch stock data");
+      if (!response.ok) throw new Error('Failed to fetch stock data');
 
       const stocks = await response.json();
-      tableBody.innerHTML = ''; // Clear existing data
+      tableBody.innerHTML = '';
 
       stocks.forEach(stock => {
         const row = document.createElement('tr');
-        row.innerHTML = `<td>${stock.name}</td><td>$${stock.price.toFixed(2)}</td>`;
+
+        const price = typeof stock.price === 'number' ? `$${stock.price.toFixed(2)}` : 'N/A';
+        const change = typeof stock.change === 'number' ? stock.change.toFixed(2) : 'N/A';
+        const percent = typeof stock.percentChange === 'number' ? `${stock.percentChange.toFixed(2)}%` : 'N/A';
+
+        row.innerHTML = `
+          <td>${stock.name}</td>
+          <td>${stock.symbol}</td>
+          <td>${price}</td>
+          <td>${change}</td>
+          <td>${percent}</td>
+        `;
+
         tableBody.appendChild(row);
       });
     } catch (error) {
       console.error('Error fetching stock data:', error);
-      tableBody.innerHTML = `<tr><td colspan="2">⚠️ Error loading stock data</td></tr>`;
+      tableBody.innerHTML = `<tr><td colspan="5">⚠️ Error loading stock data</td></tr>`;
     }
-  };
+  }
 
-  // Fetch stock data when the page loads
   fetchStockData();
-
-  // Refresh stock data every 30 seconds
-  setInterval(fetchStockData, 30000);
+  setInterval(fetchStockData, 60000);
 });
